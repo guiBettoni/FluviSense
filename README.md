@@ -163,12 +163,3 @@ A chave só vale para o próprio ponto. Sem `medida_em`, vale o horário de rece
 | [Decisões](documentos/tecnico/04-decisoes.md) | Por que cada escolha foi feita |
 | [Validação](documentos/tecnico/05-validacao.md) | Testes executados e resultados |
 
-### Atualizar os documentos Word e os diagramas
-
-Os arquivos de `documentos/entrega/` e os PNG de `documentos/tecnico/diagramas/` são gerados a partir dos arquivos Markdown de `documentos/tecnico/`. Para corrigir algo, edite o Markdown e rode, na pasta do projeto:
-
-```bash
-python documentos/gerar_documentos.py
-```
-
-O script precisa de [pandoc](https://pandoc.org/installing.html), do Mermaid CLI (`npm install -g @mermaid-js/mermaid-cli`) e do Playwright (`pip install playwright` e `playwright install chromium`). Essas ferramentas só são necessárias para gerar os documentos, não para rodar o sistema. Mudanças feitas direto no Word se perdem na próxima geração.
