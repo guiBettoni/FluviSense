@@ -1,0 +1,46 @@
+# Bancos locais de desenvolvimento
+/database/
+
+# Segredos e configuracoes locais
+.env
+.env.*
+*.env
+!.env.example
+
+# Python
+.venv/
+**/.venv/
+**/.deps/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Bancos e arquivos locais
+*.db
+*.sqlite
+*.sqlite3
+*.tmp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Site
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+coverage/
+
+# Editores e sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,50 @@
+# Roda os testes automaticamente a cada envio (push) e a cada pull request.
+name: Testes
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fluvisense_teste
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: api
+    env:
+      JWT_SECRET_KEY: segredo-usado-apenas-no-ci-0123456789abcdef
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: Testes com SQLite
+        run: pytest -q
+      - name: Testes com PostgreSQL (aplica as migrações reais)
+        run: pytest -q
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fluvisense_teste
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Confere a sintaxe dos arquivos JavaScript
+        run: for f in site/js/*.js; do node --check "$f"; done

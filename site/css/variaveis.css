@@ -1,0 +1,163 @@
+/*
+ * Variáveis visuais do FluviSense (cores, fontes, espaços), inspiradas no Fluent 2 da Microsoft.
+ * Todo componente usa estas variáveis; trocar de tema só troca os valores.
+ * Tema: atributo data-tema="claro" | "escuro" no <html> (definido em js/tema.js).
+ */
+
+:root {
+  /* Tipografia (Segoe UI Variable no Windows 11; fontes do sistema nos demais) */
+  --fonte-base: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  --fonte-titulo: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fonte-mono: "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+
+  --tamanho-pequeno: 12px;    --linha-pequeno: 16px;
+  --tamanho-corpo: 14px;       --linha-corpo: 20px;
+  --tamanho-corpo-g: 16px;    --linha-corpo-g: 22px;
+  --tamanho-subtitulo: 20px;   --linha-subtitulo: 28px;
+  --tamanho-titulo: 28px;      --linha-titulo: 36px;
+  --tamanho-destaque: 40px;    --linha-destaque: 52px;
+  --peso-normal: 400;
+  --peso-seminegrito: 600;
+  --peso-negrito: 700;
+
+  /* Espaçamento (grade de 4 px) */
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 20px;
+  --espaco-6: 24px;
+  --espaco-8: 32px;
+  --espaco-10: 40px;
+  --espaco-12: 48px;
+
+  /* Raios */
+  --raio-p: 4px;
+  --raio-m: 6px;
+  --raio-g: 8px;
+  --raio-gg: 12px;
+  --raio-pilula: 999px;
+
+  /* Movimento */
+  --curva: cubic-bezier(0.33, 0, 0.1, 1);
+  --curva-desacelera: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --duracao-rapida: 120ms;
+  --duracao-normal: 200ms;
+  --duracao-lenta: 300ms;
+
+  /* Dimensões da estrutura */
+  --altura-cabecalho: 48px;
+  --largura-nav: 260px;
+  --largura-nav-compacta: 56px;
+  --largura-conteudo: 1280px;
+  --altura-controle: 32px;
+  --altura-controle-g: 40px;
+}
+
+/* ---------- Tema claro ---------- */
+:root,
+[data-tema="claro"] {
+  color-scheme: light;
+
+  --cor-marca-fundo: #0f6cbd;
+  --cor-marca-fundo-passar: #115ea3;
+  --cor-marca-fundo-pressionado: #0c3b5e;
+  --cor-marca-texto: #0f6cbd;
+  --cor-marca-texto-passar: #115ea3;
+  --cor-marca-suave: #ebf3fc;
+  --cor-sobre-marca: #ffffff;
+
+  --cor-fundo-janela: #f3f3f3;          /* fundo da janela (efeito Mica) */
+  --cor-fundo-camada: #fafafa;
+  --cor-fundo-cartao: #ffffff;
+  --cor-fundo-cartao-passar: #f7f7f7;
+  --cor-fundo-suave-passar: rgba(0, 0, 0, 0.04);
+  --cor-fundo-suave-pressionado: rgba(0, 0, 0, 0.08);
+  --cor-fundo-entrada: #ffffff;
+  --cor-fundo-desativado: #f0f0f0;
+  --cor-fundo-sobreposicao: rgba(0, 0, 0, 0.4);
+  --cor-fundo-acrilico: rgba(252, 252, 252, 0.85);
+
+  --cor-texto-1: #242424;
+  --cor-texto-2: #424242;
+  --cor-texto-3: #616161;
+  --cor-texto-desativado: #bdbdbd;
+
+  --cor-borda-1: #d1d1d1;
+  --cor-borda-2: #e0e0e0;
+  --cor-borda-3: #ebebeb;
+  --cor-borda-acessivel: #616161;
+  --cor-foco-externo: #000000;
+  --cor-foco-interno: #ffffff;
+
+  /* Cores de estado (texto, fundo e borda) */
+  --situacao-normal-texto: #0e700e;      --situacao-normal-fundo: #f1faf1;     --situacao-normal-borda: #9fd89f;    --situacao-normal-solido: #107c10;
+  --situacao-atencao-texto: #835b00;   --situacao-atencao-fundo: #fffaeb;  --situacao-atencao-borda: #f9e2ae; --situacao-atencao-solido: #eaa300;
+  --situacao-alerta-texto: #b7471b;       --situacao-alerta-fundo: #fdf6f3;      --situacao-alerta-borda: #f4bfab;     --situacao-alerta-solido: #da3b01;
+  --situacao-critico-texto: #b10e1c;    --situacao-critico-fundo: #fdf3f4;   --situacao-critico-borda: #eeacb2;  --situacao-critico-solido: #c50f1f;
+  --situacao-neutro-texto: #616161;     --situacao-neutro-fundo: #f5f5f5;    --situacao-neutro-borda: #d1d1d1;   --situacao-neutro-solido: #8a8a8a;
+  --situacao-informacao-texto: #115ea3;        --situacao-informacao-fundo: #ebf3fc;       --situacao-informacao-borda: #b4d6fa;      --situacao-informacao-solido: #0f6cbd;
+
+  /* Elevação (sombras do Fluent 2) */
+  --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --sombra-4: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --sombra-8: 0 4px 8px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --sombra-16: 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --sombra-28: 0 14px 28px rgba(0, 0, 0, 0.24), 0 0 8px rgba(0, 0, 0, 0.2);
+  --sombra-64: 0 32px 64px rgba(0, 0, 0, 0.24), 0 0 8px rgba(0, 0, 0, 0.2);
+
+  --filtro-mapa: none;
+}
+
+/* ---------- Tema escuro ---------- */
+[data-tema="escuro"] {
+  color-scheme: dark;
+
+  --cor-marca-fundo: #115ea3;
+  --cor-marca-fundo-passar: #0f6cbd;
+  --cor-marca-fundo-pressionado: #0c3b5e;
+  --cor-marca-texto: #479ef5;
+  --cor-marca-texto-passar: #62abf5;
+  --cor-marca-suave: #082338;
+  --cor-sobre-marca: #ffffff;
+
+  --cor-fundo-janela: #202020;
+  --cor-fundo-camada: #1c1c1c;
+  --cor-fundo-cartao: #2b2b2b;
+  --cor-fundo-cartao-passar: #323232;
+  --cor-fundo-suave-passar: rgba(255, 255, 255, 0.06);
+  --cor-fundo-suave-pressionado: rgba(255, 255, 255, 0.1);
+  --cor-fundo-entrada: #292929;
+  --cor-fundo-desativado: #262626;
+  --cor-fundo-sobreposicao: rgba(0, 0, 0, 0.5);
+  --cor-fundo-acrilico: rgba(44, 44, 44, 0.9);
+
+  --cor-texto-1: #ffffff;
+  --cor-texto-2: #d6d6d6;
+  --cor-texto-3: #adadad;
+  --cor-texto-desativado: #5c5c5c;
+
+  --cor-borda-1: #666666;
+  --cor-borda-2: #525252;
+  --cor-borda-3: #3d3d3d;
+  --cor-borda-acessivel: #adadad;
+  --cor-foco-externo: #ffffff;
+  --cor-foco-interno: #000000;
+
+  --situacao-normal-texto: #54b054;      --situacao-normal-fundo: #052505;     --situacao-normal-borda: #107c10;    --situacao-normal-solido: #54b054;
+  --situacao-atencao-texto: #f2c661;   --situacao-atencao-fundo: #2e2207;  --situacao-atencao-borda: #835b00; --situacao-atencao-solido: #f2c661;
+  --situacao-alerta-texto: #f87528;       --situacao-alerta-fundo: #2e1207;      --situacao-alerta-borda: #b7471b;     --situacao-alerta-solido: #f87528;
+  --situacao-critico-texto: #dc626d;    --situacao-critico-fundo: #3b0509;   --situacao-critico-borda: #b10e1c;  --situacao-critico-solido: #dc626d;
+  --situacao-neutro-texto: #adadad;     --situacao-neutro-fundo: #333333;    --situacao-neutro-borda: #666666;   --situacao-neutro-solido: #8a8a8a;
+  --situacao-informacao-texto: #62abf5;        --situacao-informacao-fundo: #082338;       --situacao-informacao-borda: #0f548c;      --situacao-informacao-solido: #479ef5;
+
+  --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.28), 0 0 2px rgba(0, 0, 0, 0.24);
+  --sombra-4: 0 2px 4px rgba(0, 0, 0, 0.28), 0 0 2px rgba(0, 0, 0, 0.24);
+  --sombra-8: 0 4px 8px rgba(0, 0, 0, 0.28), 0 0 2px rgba(0, 0, 0, 0.24);
+  --sombra-16: 0 8px 16px rgba(0, 0, 0, 0.28), 0 0 2px rgba(0, 0, 0, 0.24);
+  --sombra-28: 0 14px 28px rgba(0, 0, 0, 0.48), 0 0 8px rgba(0, 0, 0, 0.4);
+  --sombra-64: 0 32px 64px rgba(0, 0, 0, 0.56), 0 0 8px rgba(0, 0, 0, 0.4);
+
+  /* Escurece os blocos do OpenStreetMap sem trocar de provedor */
+  --filtro-mapa: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.88) saturate(0.6);
+}

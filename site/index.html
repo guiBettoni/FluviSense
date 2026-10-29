@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FluviSense | Monitoramento de rios</title>
+  <meta name="description" content="Acompanhamento da distância entre sensores e a superfície de rios em Palhoça/SC." />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" type="image/png" href="imagens/fluvisense-marca.png" />
+  <script>
+    // Aplica o tema antes de desenhar a página, para não piscar o tema errado.
+    (function () {
+      var tema = null;
+      try { tema = localStorage.getItem('fluvisense_tema'); } catch (erro) {}
+      if (tema !== 'claro' && tema !== 'escuro') {
+        tema = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+      }
+      document.documentElement.dataset.tema = tema;
+    })();
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/variaveis.css?v=20261028" />
+  <link rel="stylesheet" href="css/base.css?v=20261028" />
+  <link rel="stylesheet" href="css/componentes.css?v=20261028" />
+  <link rel="stylesheet" href="css/estrutura.css?v=20261028" />
+  <link rel="stylesheet" href="css/paginas.css?v=20261028" />
+  <link rel="stylesheet" href="css/responsivo.css?v=20261028" />
+</head>
+<body>
+  <a class="pular-conteudo" href="#conteudo" onclick="focarConteudo(event)">Pular para o conteúdo</a>
+  <div id="janela"></div>
+  <div id="avisos" class="avisos" aria-live="polite"></div>
+
+  <!-- ===================== Início ===================== -->
+  <section id="pg-inicio" class="pagina ativa" aria-label="Início">
+    <header class="cabecalho">
+      <button class="marca" type="button" onclick="irPara('inicio')" aria-label="FluviSense, ir para o início">
+        <img src="imagens/fluvisense-marca.png" alt="" /><span>FluviSense</span>
+      </button>
+      <span class="espacador"></span>
+      <nav aria-label="Navegação principal">
+        <button class="botao discreto" type="button" onclick="irPara('mapa')"><span data-icone="mapa"></span><span class="nav-rotulo">Mapa</span></button>
+        <button class="botao discreto so-icone" type="button" data-alternar-tema onclick="alternarTema()"></button>
+        <button class="botao principal" type="button" onclick="irPara('login')"><span data-icone="entrar"></span><span class="nav-rotulo">Área do operador</span></button>
+      </nav>
+    </header>
+
+    <main data-principal tabindex="-1">
+      <section class="destaque conteiner">
+        <div class="destaque-grade">
+          <div>
+            <span class="sobretitulo"><span data-icone="local" data-tamanho="p"></span>Palhoça, Santa Catarina</span>
+            <h1>Acompanhe os rios ponto a ponto</h1>
+            <p class="chamada">O FluviSense registra a distância entre sensores instalados acima da água e a superfície dos rios, mostra a situação de cada ponto no mapa e guarda o histórico das medições.</p>
+            <div class="destaque-acoes">
+              <button class="botao principal grande" type="button" onclick="irPara('mapa')"><span data-icone="mapa"></span>Ver mapa dos pontos</button>
+              <button class="botao grande" type="button" onclick="irPara('login')">Área do operador</button>
+            </div>
+          </div>
+          <div class="destaque-imagem" aria-hidden="true"><img src="imagens/fluvisense-marca.png" alt="" /></div>
+        </div>
+      </section>
+
+      <section class="conteiner" aria-label="Resumo do monitoramento">
+        <div class="inicio-numeros">
+          <div class="cartao numero-bloco"><span class="numero-icone"><span data-icone="sensor"></span></span><span class="numero-valor" id="inicio-pontos">–</span><span class="numero-rotulo">Pontos ativos</span></div>
+          <div class="cartao numero-bloco"><span class="numero-icone"><span data-icone="agua"></span></span><span class="numero-valor" id="inicio-rios">–</span><span class="numero-rotulo">Rios</span></div>
+          <div class="cartao numero-bloco bom"><span class="numero-icone"><span data-icone="sucesso"></span></span><span class="numero-valor" id="inicio-atual">–</span><span class="numero-rotulo">Com dado atual</span></div>
+          <div class="cartao numero-bloco neutro"><span class="numero-icone"><span data-icone="relogio"></span></span><span class="numero-valor" id="inicio-sem-atual">–</span><span class="numero-rotulo">Sem dado atual</span></div>
+        </div>
+        <div class="legenda" style="margin-top: var(--espaco-4); margin-bottom: var(--espaco-2)" aria-label="Legenda das situações">
+          <span><i class="bolinha verde"></i>Normal</span>
+          <span><i class="bolinha amarelo"></i>Atenção</span>
+          <span><i class="bolinha laranja"></i>Alerta</span>
+          <span><i class="bolinha vermelho"></i>Crítico</span>
+          <span><i class="bolinha"></i>Sem dado atual</span>
+        </div>
+      </section>
+
+      <section class="secao conteiner">
+        <div class="secao-topo">
+          <h2>Como funciona</h2>
+          <p>Medir, conferir, mostrar e registrar.</p>
+        </div>
+        <div class="recursos">
+          <article class="cartao recurso"><span class="recurso-icone"><span data-icone="sensor"></span></span><h3>Distância medida</h3><p>Cada ponto mede a distância do sensor até a água. Quando a água sobe, a distância diminui.</p></article>
+          <article class="cartao recurso"><span class="recurso-icone"><span data-icone="escudo"></span></span><h3>Leituras conferidas</h3><p>Leituras impossíveis são marcadas como inválidas e saltos bruscos como suspeitos, sem apagar nada.</p></article>
+          <article class="cartao recurso"><span class="recurso-icone"><span data-icone="mapa"></span></span><h3>Situação no mapa</h3><p>A cor de cada ponto segue critérios do operador. Dados antigos aparecem como desatualizados.</p></article>
+          <article class="cartao recurso"><span class="recurso-icone"><span data-icone="historico"></span></span><h3>Rastreabilidade</h3><p>Alterações de configuração, medições manuais e simulações ficam registradas na auditoria.</p></article>
+        </div>
+        <div class="barra-mensagem atencao" style="margin-top: var(--espaco-6)" role="note">
+          <span data-icone="informacao"></span>
+          <p><strong>Sistema complementar.</strong> O FluviSense não emite alertas oficiais nem prevê enchentes. Os critérios de classificação são provisórios até serem validados. Em emergência, ligue 199 (Defesa Civil) ou 193 (Bombeiros).</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="rodape">
+      <div class="conteiner">
+        <span>FluviSense 2026 · Projeto Integrador · ADS/FMP</span>
+        <span>Monitoramento hidrológico complementar</span>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ===================== Login ===================== -->
+  <section id="pg-login" class="pagina" aria-label="Entrar">
+    <header class="cabecalho">
+      <button class="botao discreto" type="button" onclick="irPara('inicio')"><span data-icone="voltar"></span><span class="nav-rotulo">Início</span></button>
+      <span class="espacador"></span>
+      <button class="botao discreto so-icone" type="button" data-alternar-tema onclick="alternarTema()"></button>
+    </header>
+    <main class="login-area" data-principal tabindex="-1">
+      <div class="cartao login-cartao">
+        <span class="marca"><img src="imagens/fluvisense-marca.png" alt="" /><span>FluviSense</span></span>
+        <h1>Área do operador</h1>
+        <p>Acesso restrito à configuração e ao acompanhamento técnico.</p>
+        <form id="form-login" novalidate onsubmit="event.preventDefault(); entrar(this)">
+          <div data-erro-form></div>
+          <div class="campo">
+            <label class="campo-rotulo" for="login-email">E-mail</label>
+            <input class="entrada" id="login-email" type="email" autocomplete="username" required aria-describedby="login-email-erro" />
+            <span class="campo-erro" id="login-email-erro" role="alert"></span>
+          </div>
+          <div class="campo">
+            <label class="campo-rotulo" for="login-senha">Senha</label>
+            <input class="entrada" id="login-senha" type="password" autocomplete="current-password" required aria-describedby="login-senha-erro" />
+            <span class="campo-erro" id="login-senha-erro" role="alert"></span>
+          </div>
+          <button class="botao principal grande largura-total" type="submit"><span data-icone="entrar"></span>Entrar</button>
+        </form>
+      </div>
+    </main>
+  </section>
+
+  <!-- ===================== Mapa público ===================== -->
+  <section id="pg-mapa" class="pagina" aria-label="Mapa dos pontos">
+    <header class="cabecalho">
+      <button class="botao discreto" type="button" onclick="irPara('inicio')"><span data-icone="voltar"></span><span class="nav-rotulo">Início</span></button>
+      <span class="marca" aria-hidden="true"><img src="imagens/fluvisense-marca.png" alt="" /><span>FluviSense</span><span class="marca-sub">Mapa dos pontos</span></span>
+      <span class="espacador"></span>
+      <button class="botao discreto so-icone" type="button" data-alternar-tema onclick="alternarTema()"></button>
+    </header>
+    <main class="mapa-estrutura" data-principal tabindex="-1">
+      <div id="mapa" class="mapa-tela" role="region" aria-label="Mapa dos pontos de monitoramento"></div>
+      <aside class="mapa-lateral" aria-label="Lista de pontos">
+        <div class="mapa-lateral-topo">
+          <h2>Pontos de monitoramento</h2>
+          <p class="texto-pequeno texto-apagado">Só dados reais. As cores seguem critérios provisórios do operador e não são alertas oficiais.</p>
+          <div class="filtros">
+            <div class="campo">
+              <label class="campo-rotulo texto-pequeno" for="mapa-rio">Rio</label>
+              <select class="selecao" id="mapa-rio" onchange="aplicarFiltros()"><option value="">Todos os rios</option></select>
+            </div>
+            <div class="campo">
+              <label class="campo-rotulo texto-pequeno" for="mapa-situacao">Situação</label>
+              <select class="selecao" id="mapa-situacao" onchange="aplicarFiltros()">
+                <option value="">Todas</option>
+                <option value="verde">Normal</option>
+                <option value="amarelo">Atenção</option>
+                <option value="laranja">Alerta</option>
+                <option value="vermelho">Crítico</option>
+                <option value="desatualizado">Desatualizado</option>
+                <option value="sem_dados">Sem dados</option>
+                <option value="sem_criterio">Sem critério</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="mapa-pontos" class="mapa-lista" aria-live="polite" tabindex="0" aria-label="Lista de pontos de monitoramento"></div>
+      </aside>
+    </main>
+  </section>
+
+  <!-- ===================== Painel do operador ===================== -->
+  <section id="pg-painel" class="pagina" aria-label="Painel do operador">
+    <div class="moldura" id="moldura">
+      <nav class="nav-painel" id="nav-painel" aria-label="Seções do painel">
+        <span class="marca"><img src="imagens/fluvisense-marca.png" alt="" /><span class="marca-texto">FluviSense</span></span>
+        <ul class="nav-lista">
+          <li><button class="nav-item" id="nav-situacao" type="button" onclick="mostrarAba('situacao')" title="Situação"><span data-icone="grade"></span><span class="rotulo">Situação</span></button></li>
+          <li><button class="nav-item" id="nav-pontos" type="button" onclick="mostrarAba('pontos')" title="Rios e pontos"><span data-icone="local"></span><span class="rotulo">Rios e pontos</span></button></li>
+          <li><button class="nav-item" id="nav-medicoes" type="button" onclick="mostrarAba('medicoes')" title="Medições"><span data-icone="grafico"></span><span class="rotulo">Medições</span></button></li>
+          <li><button class="nav-item" id="nav-simulacao" type="button" onclick="mostrarAba('simulacao')" title="Simulação"><span data-icone="frasco"></span><span class="rotulo">Simulação</span></button></li>
+          <li><button class="nav-item" id="nav-ocorrencias" type="button" onclick="mostrarAba('ocorrencias')" title="Ocorrências"><span data-icone="atencao"></span><span class="rotulo">Ocorrências</span></button></li>
+          <li><button class="nav-item" id="nav-auditoria" type="button" onclick="mostrarAba('auditoria')" title="Auditoria"><span data-icone="historico"></span><span class="rotulo">Auditoria</span></button></li>
+        </ul>
+        <div class="nav-rodape nav-lista">
+          <button class="nav-item" type="button" onclick="irPara('mapa')" title="Mapa público"><span data-icone="mapa"></span><span class="rotulo">Mapa público</span></button>
+          <button class="nav-item" type="button" data-alternar-tema="rotulo" onclick="alternarTema()"></button>
+          <button class="nav-item" type="button" onclick="sair()" title="Sair"><span data-icone="sair"></span><span class="rotulo">Sair</span></button>
+        </div>
+      </nav>
+      <div class="nav-fundo" onclick="alternarMenu(false)"></div>
+
+      <div class="moldura-principal">
+        <header class="moldura-cabecalho">
+          <button class="botao discreto so-icone botao-menu" type="button" onclick="alternarMenu()" aria-label="Abrir menu" aria-controls="nav-painel" aria-expanded="false"><span data-icone="menu"></span></button>
+          <div class="pagina-titulo">
+            <h1 id="titulo-painel">Situação dos pontos</h1>
+          </div>
+          <div class="pessoa" id="operador"></div>
+        </header>
+
+        <main class="moldura-conteudo" data-principal tabindex="-1">
+          <!-- Situação -->
+          <section id="aba-situacao" class="aba ativa" aria-labelledby="titulo-painel">
+            <div class="numeros-grade">
+              <div class="cartao numero-bloco"><span class="numero-icone"><span data-icone="sensor"></span></span><span class="numero-valor" id="painel-pontos">–</span><span class="numero-rotulo">Pontos ativos</span></div>
+              <div class="cartao numero-bloco bom"><span class="numero-icone"><span data-icone="sucesso"></span></span><span class="numero-valor" id="painel-atual">–</span><span class="numero-rotulo">Com dado atual</span></div>
+              <div class="cartao numero-bloco atencao"><span class="numero-icone"><span data-icone="atencao"></span></span><span class="numero-valor" id="painel-alerta">–</span><span class="numero-rotulo">Em alerta ou crítico</span></div>
+              <div class="cartao numero-bloco neutro"><span class="numero-icone"><span data-icone="relogio"></span></span><span class="numero-valor" id="painel-sem-atual">–</span><span class="numero-rotulo">Sem dado atual</span></div>
+            </div>
+            <div class="cartao">
+              <div class="cartao-cabecalho">
+                <div>
+                  <h2>Pontos</h2>
+                  <p id="painel-nota-modo"></p>
+                </div>
+                <div class="segmentado" role="group" aria-label="Fonte dos dados">
+                  <button type="button" data-modo="real" aria-pressed="true" onclick="escolherModoPainel('real')">Dados reais</button>
+                  <button type="button" data-modo="simulada" aria-pressed="false" onclick="escolherModoPainel('simulada')">Dados simulados</button>
+                </div>
+              </div>
+              <div class="cartao-corpo sem-espaco">
+                <div class="tabela-moldura">
+                  <table class="tabela responsiva">
+                    <caption class="so-leitor-tela">Situação de cada ponto ativo</caption>
+                    <thead><tr><th scope="col">Ponto</th><th scope="col">Rio</th><th scope="col">Distância</th><th scope="col">Medida em</th><th scope="col">Validade</th><th scope="col">Situação</th><th scope="col">Observações</th></tr></thead>
+                    <tbody id="painel-linhas"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <p class="painel-nota texto-pequeno"><span data-icone="informacao" data-tamanho="p"></span><span>Leituras suspeitas ou inválidas no momento: <strong id="painel-suspeitas">0</strong>. A tela se atualiza sozinha a cada 15 segundos.</span></p>
+          </section>
+
+          <!-- Rios e pontos -->
+          <section id="aba-pontos" class="aba" aria-labelledby="titulo-painel">
+            <div class="duas-colunas">
+              <div class="cartao">
+                <div class="cartao-cabecalho">
+                  <div><h2>Pontos de monitoramento</h2><p>Cada ponto tem rio, localização, critérios e validação próprios.</p></div>
+                  <button class="botao principal" type="button" onclick="abrirFormularioPonto()"><span data-icone="adicionar"></span>Novo ponto</button>
+                </div>
+                <div class="cartao-corpo"><div id="pontos-grade" class="pontos-grade"></div></div>
+              </div>
+              <div class="cartao">
+                <div class="cartao-cabecalho">
+                  <div><h2>Rios</h2></div>
+                  <button class="botao" type="button" onclick="abrirFormularioRio()"><span data-icone="adicionar"></span>Novo rio</button>
+                </div>
+                <div class="cartao-corpo"><ul id="rios-lista" class="rios-lista"></ul></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Medições -->
+          <section id="aba-medicoes" class="aba" aria-labelledby="titulo-painel">
+            <div class="cartao">
+              <div class="cartao-corpo">
+                <div class="barra-ferramentas">
+                  <div class="campo"><label class="campo-rotulo" for="historico-ponto">Ponto</label><select class="selecao" id="historico-ponto" onchange="carregarHistorico()"></select></div>
+                  <div class="campo"><label class="campo-rotulo" for="historico-modo">Dados</label>
+                    <select class="selecao" id="historico-modo" onchange="carregarHistorico()">
+                      <option value="real">Reais</option>
+                      <option value="simulada">Simulados</option>
+                      <option value="todas">Todos</option>
+                    </select>
+                  </div>
+                  <span class="espacador"></span>
+                  <button class="botao" type="button" onclick="exportarHistorico()"><span data-icone="baixar"></span>Exportar CSV</button>
+                  <button class="botao principal" type="button" onclick="abrirFormularioMedicao()"><span data-icone="adicionar"></span>Registrar medição</button>
+                </div>
+              </div>
+            </div>
+            <div class="cartao">
+              <div class="cartao-cabecalho"><div><h2>Distância ao longo do tempo</h2><p>Quanto mais baixa a linha, mais perto a água está do sensor.</p></div></div>
+              <div class="cartao-corpo" id="historico-grafico"></div>
+            </div>
+            <div class="cartao">
+              <div class="cartao-corpo sem-espaco">
+                <div class="tabela-moldura">
+                  <table class="tabela responsiva">
+                    <caption class="so-leitor-tela">Histórico de medições do ponto</caption>
+                    <thead><tr><th scope="col">Medida em</th><th scope="col">Distância</th><th scope="col">Origem</th><th scope="col">Validade</th><th scope="col">Classificação na época</th><th scope="col">Referência</th><th scope="col">Registrado por</th></tr></thead>
+                    <tbody id="historico-linhas"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Simulação -->
+          <section id="aba-simulacao" class="aba" aria-labelledby="titulo-painel">
+            <div class="duas-colunas">
+              <div class="cartao">
+                <div class="cartao-cabecalho"><div><h2>Gerar série simulada</h2><p>Medições simuladas não aparecem no mapa público e não entram no cálculo dos dados reais.</p></div></div>
+                <div class="cartao-corpo">
+                  <form id="form-simulacao" class="form-grade" novalidate onsubmit="event.preventDefault(); gerarSimulacao(this)">
+                    <div class="ocupa-2" data-erro-form></div>
+                    <div class="campo ocupa-2"><label class="campo-rotulo" for="sim-ponto">Ponto</label><select class="selecao" id="sim-ponto" onchange="mostrarSituacaoSimulada()"></select></div>
+                    <div class="campo ocupa-2"><label class="campo-rotulo" for="sim-cenario">Cenário</label>
+                      <select class="selecao" id="sim-cenario" onchange="atualizarDicaCenario()" aria-describedby="sim-dica">
+                        <option value="subida">Subida da água</option>
+                        <option value="descida">Descida da água</option>
+                        <option value="oscilacao">Oscilação</option>
+                      </select>
+                      <span class="campo-dica" id="sim-dica"></span>
+                    </div>
+                    <div class="campo"><label class="campo-rotulo" for="sim-inicial">Distância inicial (cm)</label><input class="entrada" id="sim-inicial" type="number" step="0.01" min="0.01" value="300" required aria-describedby="sim-inicial-erro"><span class="campo-erro" id="sim-inicial-erro"></span></div>
+                    <div class="campo"><label class="campo-rotulo" for="sim-variacao">Variação total (cm)</label><input class="entrada" id="sim-variacao" type="number" step="0.01" min="0.01" value="150" required aria-describedby="sim-variacao-erro"><span class="campo-erro" id="sim-variacao-erro"></span></div>
+                    <div class="campo"><label class="campo-rotulo" for="sim-quantidade">Quantidade de medições</label><input class="entrada" id="sim-quantidade" type="number" min="2" max="200" step="1" value="12" required aria-describedby="sim-quantidade-erro"><span class="campo-erro" id="sim-quantidade-erro"></span></div>
+                    <div class="campo"><label class="campo-rotulo" for="sim-intervalo">Intervalo entre medições (min)</label><input class="entrada" id="sim-intervalo" type="number" min="1" max="1440" step="1" value="10" required aria-describedby="sim-intervalo-erro"><span class="campo-erro" id="sim-intervalo-erro"></span></div>
+                    <div class="form-acoes ocupa-2">
+                      <button class="botao discreto" type="button" onclick="apagarSimulacao(this)"><span data-icone="excluir"></span>Limpar simulados do ponto</button>
+                      <span class="espacador"></span>
+                      <button class="botao principal" type="submit"><span data-icone="frasco"></span>Gerar simulação</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="cartao">
+                <div class="cartao-cabecalho"><div><h2>Situação simulada</h2></div></div>
+                <div class="cartao-corpo sim-resultado">
+                  <div id="sim-situacao"></div>
+                  <div id="sim-grafico"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Ocorrências -->
+          <section id="aba-ocorrencias" class="aba" aria-labelledby="titulo-painel">
+            <div class="cartao">
+              <div class="cartao-cabecalho">
+                <div class="campo" style="min-width:200px">
+                  <label class="campo-rotulo" for="ocorrencias-filtro">Mostrar</label>
+                  <select class="selecao" id="ocorrencias-filtro" onchange="mostrarOcorrencias()"><option value="abertas">Abertas</option><option value="todas">Todas</option></select>
+                </div>
+                <button class="botao perigo" type="button" onclick="abrirFormularioOcorrencia()"><span data-icone="adicionar"></span>Registrar ocorrência</button>
+              </div>
+              <div class="cartao-corpo sem-espaco">
+                <div class="tabela-moldura">
+                  <table class="tabela responsiva">
+                    <caption class="so-leitor-tela">Ocorrências manuais</caption>
+                    <thead><tr><th scope="col">Ponto</th><th scope="col">Classificação</th><th scope="col">Motivo</th><th scope="col">Aberta em</th><th scope="col">Encerrada em</th></tr></thead>
+                    <tbody id="ocorrencias-linhas"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Auditoria -->
+          <section id="aba-auditoria" class="aba" aria-labelledby="titulo-painel">
+            <div class="cartao">
+              <div class="cartao-cabecalho">
+                <div><h2>Registro de alterações</h2><p>As 250 ações mais recentes.</p></div>
+                <button class="botao" type="button" onclick="exportarAuditoria()"><span data-icone="baixar"></span>Exportar CSV</button>
+              </div>
+              <div class="cartao-corpo sem-espaco">
+                <div class="tabela-moldura">
+                  <table class="tabela responsiva">
+                    <caption class="so-leitor-tela">Registro de alterações</caption>
+                    <thead><tr><th scope="col">Data</th><th scope="col">Usuário</th><th scope="col">Ação</th><th scope="col">Entidade</th><th scope="col">Detalhes</th></tr></thead>
+                    <tbody id="auditoria-linhas"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Endereço da API publicada. Em localhost o site usa http://localhost:8001/api (ver js/configuracao.js).
+    // Atenção: o serviço no Render ainda se chama hydrosys-api (nome anterior do projeto). Se ele for renomeado, troque o endereço aqui.
+    window.FLUVISENSE_CONFIGURACAO = {
+      enderecoApi: "https://hydrosys-api.onrender.com/api",
+      intervaloAtualizacaoMs: 15000
+    };
+  </script>
+  <!-- integrity: o navegador só executa o arquivo se ele for idêntico ao original do Leaflet 1.9.4 -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+  <script type="module" src="js/principal.js?v=20261028"></script>
+  <!-- VLibras (tradução para Libras, do governo federal). Os atributos e classes abaixo são exigidos pelo próprio VLibras. -->
+  <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
+</body>
+</html>
